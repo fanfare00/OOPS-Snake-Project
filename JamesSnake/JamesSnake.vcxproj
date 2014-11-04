@@ -10,6 +10,7 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+<<<<<<< HEAD
   <ItemGroup>
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\LTexture.cpp" />
@@ -21,6 +22,8 @@
     <ClInclude Include="src\LTexture.h" />
     <ClInclude Include="src\SnakeSegment.h" />
   </ItemGroup>
+=======
+>>>>>>> f9865089e44d7fa14789bd4b914ad2ae1dc7a6dd
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EE531AF0-208F-440C-9EE4-B4B5F1B4C012}</ProjectGuid>
     <RootNamespace>JamesSnake</RootNamespace>
@@ -50,8 +53,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+<<<<<<< HEAD
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\lib\x86;$(LibraryPath)</LibraryPath>
+=======
+    <IncludePath>C:\Users\james\Desktop\JamesSnake\JamesSnake\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\james\Desktop\JamesSnake\JamesSnake\lib\x86;$(LibraryPath)</LibraryPath>
+>>>>>>> f9865089e44d7fa14789bd4b914ad2ae1dc7a6dd
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -79,6 +87,20 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+<<<<<<< HEAD
+=======
+  <ItemGroup>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="LTexture.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="SnakeSegment.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="LTexture.h" />
+    <ClInclude Include="SnakeSegment.h" />
+  </ItemGroup>
+>>>>>>> f9865089e44d7fa14789bd4b914ad2ae1dc7a6dd
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
