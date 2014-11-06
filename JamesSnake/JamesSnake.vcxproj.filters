@@ -1,14 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\LTexture.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\SnakeSegment.cpp" />
+    <ClCompile Include="src\JamesSnake.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Game.h" />
     <ClInclude Include="src\LTexture.h" />
     <ClInclude Include="src\SnakeSegment.h" />
+    <ClInclude Include="src\JamesSnake.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\SnakeUtil.h" />
   </ItemGroup>
 </Project>
