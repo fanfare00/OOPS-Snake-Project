@@ -6,15 +6,25 @@
 #include <string>
 #include <vector>
 #include "time.h"
-
-
 #include <SDL_thread.h>
+
+
 
 #include "JamesSnake.h"
 
 
 int main(int argc, char* args[])
 {
+	//The window we'll be rendering to
+	//SDL_Window* gWindow = NULL;
+
+	//The window renderer
+
+	//SDL_Renderer* gRenderer = NULL;
+
+
+	//TTF_Font *gFont = NULL;
+
 	JamesSnake game = JamesSnake::getInstance();
 		game.start();
 		game.mainGameLoop();

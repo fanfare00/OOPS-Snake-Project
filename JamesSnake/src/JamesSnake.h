@@ -17,7 +17,9 @@
 #include "LTexture.h"
 #include "SnakeSegment.h"
 
+#include "SnakeUtil.h"
 
+using namespace snake;
 
 
 
@@ -25,30 +27,64 @@ class JamesSnake
 {
 public:
 
-	const int SNAKE_DIRECTION_UP = 1;
-	const int SNAKE_DIRECTION_DOWN = 2;
-	const int SNAKE_DIRECTION_LEFT = 3;
-	const int SNAKE_DIRECTION_RIGHT = 4;
+	//The window we'll be rendering to
+	SDL_Window* gWindow = NULL;
 
-	//Screen dimension constants
-	const int SCREEN_WIDTH = 800;
-	const int SCREEN_HEIGHT = 600;
+	SDL_Renderer* gRenderer;
 
-	//The dimensions of the dot
-	const int SEGMENT_WIDTH = 40;
-	const int SEGMENT_HEIGHT = 40;
+	TTF_Font *gFont;
 
-	const int GAME_STEP_RATE = 10;
 
-	const int GAME_FIELD_WIDTH = SCREEN_WIDTH - SEGMENT_WIDTH * 2;
-	const int GAME_FIELD_HEIGHT = SCREEN_HEIGHT - SEGMENT_HEIGHT * 3;
-	const int GAME_FIELD_XPOS = SEGMENT_WIDTH;
-	const int GAME_FIELD_YPOS = SEGMENT_HEIGHT * 2;
 
-	LTexture gTextTexture;
+	class LTexture
+	{
+	public:
 
-	//Snake direction constants
+		//Initializes variables
+		LTexture();
 
+		//Deallocates memory
+		~LTexture();
+
+		//Loads image at specified path
+		bool loadFromFile(std::string path, SDL_Renderer* gRenderer);
+
+		//Creates image from font string
+		bool loadFromRenderedText(std::string textureText, SDL_Color textColor, SDL_Renderer* gRenderer, TTF_Font *gFont);
+
+		//Deallocates texture
+		void free();
+
+		//Set color modulation
+		void setColor(Uint8 red, Uint8 green, Uint8 blue);
+
+		//Set blending
+		void setBlendMode(SDL_BlendMode blending);
+
+		//Set alpha modulation
+		void setAlpha(Uint8 alpha);
+
+		//Renders texture at given point
+		void render(SDL_Renderer* gRenderer, int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+
+		//Gets image dimensions
+		int getWidth();
+		int getHeight();
+
+
+
+		//The window renderer
+
+		
+
+	private:
+		//The actual hardware texture
+		SDL_Texture* mTexture;
+
+		//Image dimensions
+		int mWidth;
+		int mHeight;
+	};
 
 	//Main loop flag
 	bool quit = false;
@@ -65,6 +101,7 @@ public:
 
 	//Scene textures
 	LTexture gSegmentTexture;
+	LTexture gTextTexture;
 
 	 std::vector<SnakeSegment> segments;
 
@@ -109,7 +146,7 @@ public:
 
 	//static int threadFunction(void* data);
 
-	
+
 };
 
 
