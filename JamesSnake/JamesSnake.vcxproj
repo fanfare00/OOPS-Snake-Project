@@ -12,14 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\JamesSnake.cpp" />
-    <ClCompile Include="src\LTexture.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\SnakeSegment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\JamesSnake.h" />
-    <ClInclude Include="src\LTexture.h" />
-    <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\SnakeSegment.h" />
     <ClInclude Include="src\SnakeUtil.h" />
   </ItemGroup>

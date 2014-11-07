@@ -13,8 +13,6 @@
 #include <vector>
 #include "time.h"
 
-
-#include "LTexture.h"
 #include "SnakeSegment.h"
 
 #include "SnakeUtil.h"
@@ -71,7 +69,7 @@ public:
 		int getWidth();
 		int getHeight();
 
-
+		SDL_Texture* mTexture;
 
 		//The window renderer
 
@@ -79,7 +77,7 @@ public:
 
 	private:
 		//The actual hardware texture
-		SDL_Texture* mTexture;
+		
 
 		//Image dimensions
 		int mWidth;
@@ -92,6 +90,11 @@ public:
 	//
 	bool pause = false;
 
+
+	//
+	int score = 0;
+	int bestScore = 0;
+	std::string mapName = "Meadow";
 
 	//Event handler
 	SDL_Event e;
@@ -120,6 +123,8 @@ public:
 	void close();
 
 	void start();
+
+	void setGameText();
 
 	//Box collision detector
 	bool checkCollision(SDL_Rect a, SDL_Rect b);

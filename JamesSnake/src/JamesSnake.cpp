@@ -91,7 +91,7 @@ bool JamesSnake::loadMedia()
 	}
 
 	//Open the font
-	gFont = TTF_OpenFont("SlimJoe.ttf", 20);
+	gFont = TTF_OpenFont("SlimJoe.ttf", 32);
 	if (gFont == NULL)
 	{
 		printf("Failed to load lazy font! SDL_ttf Error: %s\n", TTF_GetError());
@@ -100,13 +100,7 @@ bool JamesSnake::loadMedia()
 	else
 	{
 
-		//Render text
-		SDL_Color textColor = { 0, 0, 0 };
-		if (!gTextTexture.loadFromRenderedText("The quick brown fox jumps over the lazy dog", textColor, gRenderer, gFont))
-		{
-			printf("Failed to render text texture!\n");
-			success = false;
-		}
+		setGameText();
 	}
 
 	return success;
@@ -208,7 +202,27 @@ void JamesSnake::start()
 	}
 }
 
+void JamesSnake::setGameText()
+{
+	std::string fullGameText;
+	if (score < 10)
+	{
+		fullGameText = "Score " + std::to_string(score) + "         " + mapName + "         Best " + std::to_string(bestScore);
+	}
+	else
+	{
+		fullGameText = "Score " + std::to_string(score) + "        " + mapName + "         Best " + std::to_string(bestScore);
+	}
 
+
+	//Render text
+	SDL_Color textColor = { 0, 0, 0 };
+	if (!gTextTexture.loadFromRenderedText(fullGameText, textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+		
+	}
+}
 
 void JamesSnake::handleEvent(SDL_Event& e)
 {
@@ -312,8 +326,17 @@ void JamesSnake::spawnFood()
 	//Set the food
 	food.x = getBlockPos(((rand() % 10) * ((GAME_FIELD_WIDTH+SEGMENT_WIDTH) / 10)));
 	food.y = SEGMENT_HEIGHT + getBlockPos(((rand() % 10) * ((GAME_FIELD_HEIGHT + SEGMENT_HEIGHT) / 10)));
-	printf("X: %i \n", food.x);
-	printf("Y: %i \n", food.y);
+
+	for (int i = 0; i < segments.size(); i++)
+	{
+		if ((food.x == segments[i].mCollider.x) && (food.y == segments[i].mCollider.y))
+		{
+			printf("DUPLICATE\n");
+			spawnFood();
+		}
+	}
+
+	return;
 
 }
 
@@ -350,12 +373,15 @@ void JamesSnake::updateSnake()
 		{
 			for (int i = 1; i < segments.size(); i++)
 			{
-				
+
 				segments[i].mPosXPrev = segments[i].mPosX;
 				segments[i].mPosYPrev = segments[i].mPosY;
 
 				segments[i].mPosX = segments[i - 1].mPosXPrev;
 				segments[i].mPosY = segments[i - 1].mPosYPrev;
+
+				segments[i].mCollider.x = segments[i].mPosX;
+				segments[i].mCollider.y = segments[i].mPosY;
 
 			}
 		}
@@ -492,8 +518,8 @@ bool JamesSnake::LTexture::loadFromFile(std::string path, SDL_Renderer* gRendere
 			mHeight = loadedSurface->h;
 		}
 
-		//Get rid of old loaded surface
-		SDL_FreeSurface(loadedSurface);
+//Get rid of old loaded surface
+SDL_FreeSurface(loadedSurface);
 	}
 
 	//Return success
@@ -524,6 +550,9 @@ void JamesSnake::mainGameLoop()
 {
 	srand(time(NULL));
 
+	score = 0;
+	setGameText();
+
 	//Set field variables
 	SDL_Rect field;
 	field.w = GAME_FIELD_WIDTH;
@@ -542,13 +571,14 @@ void JamesSnake::mainGameLoop()
 	segments.push_back(head);
 
 
+
 	food.w = SEGMENT_WIDTH;
 	food.h = SEGMENT_HEIGHT;
 
 	food.x = getBlockPos((SCREEN_WIDTH / 2) + (SCREEN_WIDTH / 6));
-	food.y = getBlockPos((SCREEN_HEIGHT / 2) - 40);;
+	food.y = getBlockPos((SCREEN_HEIGHT / 2) - 40);
 
-
+	//SDL_FillRect(gSegmentTexture.mTexture, food, SDL_mapRGB(s->format(100, 200, 300));
 
 	//While application is running
 	while (!quit)
@@ -586,13 +616,30 @@ void JamesSnake::mainGameLoop()
 
 		segments[0].move();
 
+
 		//if the snake collides with food
 		if (checkCollision(segments[0].mCollider, food))
 		{
+			score += 1;
+			if (score > bestScore)
+			{
+				bestScore += 1;
+			}
+			setGameText();
 			addSnakeSegment();
 			spawnFood();
 		}
 
+		for (int i = 1; i < segments.size(); i++)
+		{
+			if (checkCollision(segments[0].mCollider, segments[i].mCollider))
+			{
+				printf("YOU LOSE");
+				mainGameLoop();
+				
+			}
+
+		}
 		//If the snake collided or went too far to the left or right
 		if ((segments[0].mPosX < GAME_FIELD_XPOS) || (segments[0].mPosX + SEGMENT_WIDTH >(GAME_FIELD_WIDTH + GAME_FIELD_XPOS)))
 		{
@@ -610,8 +657,13 @@ void JamesSnake::mainGameLoop()
 		SDL_RenderClear(gRenderer);
 
 		//Render food
-		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
-		SDL_RenderDrawRect(gRenderer, &food);
+		
+
+		
+		SDL_SetRenderDrawColor(gRenderer, 0, 255, 100, 255);
+		SDL_RenderFillRect(gRenderer, &food);
+
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
 		SDL_RenderDrawRect(gRenderer, &field);
 
 		//Update Snake Chain
@@ -620,14 +672,13 @@ void JamesSnake::mainGameLoop()
 		//Render segments	
 		renderSnake();
 
-		gTextTexture.render(gRenderer, 10,10);
+
+
+
+		gTextTexture.render(gRenderer, 40, 25);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
-
-
-
-
 	}
 
 
