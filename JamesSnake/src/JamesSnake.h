@@ -32,7 +32,8 @@ public:
 
 	TTF_Font *gFont;
 
-
+	int tW, tH;
+	
 
 	class LTexture
 	{
@@ -104,7 +105,10 @@ public:
 
 	//Scene textures
 	LTexture gSegmentTexture;
-	LTexture gTextTexture;
+	LTexture gKeyTexture;
+	LTexture gScoreTextTexture;
+	LTexture gMapTextTexture;
+	LTexture gBestTextTexture;
 
 	 std::vector<SnakeSegment> segments;
 

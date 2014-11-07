@@ -90,6 +90,12 @@ bool JamesSnake::loadMedia()
 		success = false;
 	}
 
+	if (!gKeyTexture.loadFromFile("keyUpDown.png", gRenderer))
+	{
+		printf("Failed to load dot texture!\n");
+		success = false;
+	}
+
 	//Open the font
 	gFont = TTF_OpenFont("SlimJoe.ttf", 32);
 	if (gFont == NULL)
@@ -108,8 +114,12 @@ bool JamesSnake::loadMedia()
 
 void JamesSnake::close()
 {
+	gMapTextTexture.free();
+
+	gBestTextTexture.free();
+
 	//Free loaded images
-	gTextTexture.free();
+	gScoreTextTexture.free();
 
 	//Free loaded images
 	gSegmentTexture.free();
@@ -204,23 +214,25 @@ void JamesSnake::start()
 
 void JamesSnake::setGameText()
 {
-	std::string fullGameText;
-	if (score < 10)
-	{
-		fullGameText = "Score " + std::to_string(score) + "         " + mapName + "         Best " + std::to_string(bestScore);
-	}
-	else
-	{
-		fullGameText = "Score " + std::to_string(score) + "        " + mapName + "         Best " + std::to_string(bestScore);
-	}
-
 
 	//Render text
 	SDL_Color textColor = { 0, 0, 0 };
-	if (!gTextTexture.loadFromRenderedText(fullGameText, textColor, gRenderer, gFont))
+	if (!gScoreTextTexture.loadFromRenderedText("Score " + std::to_string(score), textColor, gRenderer, gFont))
 	{
 		printf("Failed to render text texture!\n");
 		
+	}
+
+	if (!gMapTextTexture.loadFromRenderedText(mapName, textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
+	}
+
+	if (!gBestTextTexture.loadFromRenderedText("Best " + std::to_string(bestScore), textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
 	}
 }
 
@@ -245,6 +257,12 @@ void JamesSnake::handleEvent(SDL_Event& e)
 
 				//Render segments	
 				renderSnake();
+
+				if (!gKeyTexture.loadFromFile("keyLeftRight.png", gRenderer))
+				{
+					printf("Failed to load dot texture!\n");
+					
+				}
 	
 			}
 			break;
@@ -262,6 +280,12 @@ void JamesSnake::handleEvent(SDL_Event& e)
 				//Render segments	
 				renderSnake();
 
+				if (!gKeyTexture.loadFromFile("keyLeftRight.png", gRenderer))
+				{
+					printf("Failed to load dot texture!\n");
+
+				}
+
 			}
 			break;
 
@@ -277,6 +301,12 @@ void JamesSnake::handleEvent(SDL_Event& e)
 
 				//Render segments	
 				renderSnake();
+
+				if (!gKeyTexture.loadFromFile("keyUpDown.png", gRenderer))
+				{
+					printf("Failed to load dot texture!\n");
+
+				}
 
 			}
 
@@ -294,6 +324,12 @@ void JamesSnake::handleEvent(SDL_Event& e)
 
 				//Render segments	
 				renderSnake();
+
+				if (!gKeyTexture.loadFromFile("keyUpDown.png", gRenderer))
+				{
+					printf("Failed to load dot texture!\n");
+
+				}
 
 			}
 			break;
@@ -367,6 +403,8 @@ void JamesSnake::renderSnake()
 
 void JamesSnake::updateSnake()
 {
+
+
 	if (segments.size() > 1)
 	{
 		if (segments[0].moveFactor == 1000)
@@ -546,6 +584,7 @@ void JamesSnake::LTexture::render(SDL_Renderer* gRenderer, int x, int y, SDL_Rec
 }
 
 
+
 void JamesSnake::mainGameLoop()
 {
 	srand(time(NULL));
@@ -563,28 +602,29 @@ void JamesSnake::mainGameLoop()
 
 	//The dot that will be moving around on the screen
 	SnakeSegment head;
-	head.mPosX = getBlockPos((SCREEN_WIDTH / 2) - (SCREEN_WIDTH / 6));
-	head.mPosY = getBlockPos((SCREEN_HEIGHT / 2) - 40);
+	head.mPosX = getBlockPos((GAME_FIELD_WIDTH / 2) - (GAME_FIELD_WIDTH / 6));
+	head.mPosY = getBlockPos((GAME_FIELD_HEIGHT / 2));
+
 
 	//clear snake tail and add head
 	segments.clear();
 	segments.push_back(head);
-
+	addSnakeSegment();
+	addSnakeSegment();
+	updateSnake();
 
 
 	food.w = SEGMENT_WIDTH;
 	food.h = SEGMENT_HEIGHT;
 
-	food.x = getBlockPos((SCREEN_WIDTH / 2) + (SCREEN_WIDTH / 6));
-	food.y = getBlockPos((SCREEN_HEIGHT / 2) - 40);
+	food.x = getBlockPos((GAME_FIELD_WIDTH / 2) + (GAME_FIELD_WIDTH / 6));
+	food.y = getBlockPos((GAME_FIELD_HEIGHT / 2));
 
 	//SDL_FillRect(gSegmentTexture.mTexture, food, SDL_mapRGB(s->format(100, 200, 300));
 
 	//While application is running
 	while (!quit)
 	{
-
-
 		if (pause)
 		{
 			while (true)
@@ -657,9 +697,7 @@ void JamesSnake::mainGameLoop()
 		SDL_RenderClear(gRenderer);
 
 		//Render food
-		
-
-		
+	
 		SDL_SetRenderDrawColor(gRenderer, 0, 255, 100, 255);
 		SDL_RenderFillRect(gRenderer, &food);
 
@@ -672,10 +710,14 @@ void JamesSnake::mainGameLoop()
 		//Render segments	
 		renderSnake();
 
+		gScoreTextTexture.render(gRenderer, 40, 25);
+		
+		TTF_SizeText(gFont, (char*)mapName.c_str(), &tW, &tH);
+		gMapTextTexture.render(gRenderer, (SCREEN_WIDTH/2) - (tW/2), 25);
 
+		gBestTextTexture.render(gRenderer, SCREEN_WIDTH - 175, 25);
 
-
-		gTextTexture.render(gRenderer, 40, 25);
+		gKeyTexture.render(gRenderer, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 225);
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);

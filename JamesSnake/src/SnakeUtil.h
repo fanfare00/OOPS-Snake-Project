@@ -19,7 +19,7 @@ namespace snake
 
 	//Screen dimension constants
 	const int SCREEN_WIDTH = 800;
-	const int SCREEN_HEIGHT = 600;
+	const int SCREEN_HEIGHT = 800;
 
 	//The dimensions of the dot
 	 const int SEGMENT_WIDTH = 40;
@@ -28,7 +28,7 @@ namespace snake
 	 const int GAME_STEP_RATE = 10;
 
 	 const int GAME_FIELD_WIDTH = SCREEN_WIDTH - SEGMENT_WIDTH * 2;
-	 const int GAME_FIELD_HEIGHT = SCREEN_HEIGHT - SEGMENT_HEIGHT * 3;
+	 const int GAME_FIELD_HEIGHT = (SCREEN_HEIGHT - SEGMENT_HEIGHT * 3)-200;
 	 const int GAME_FIELD_XPOS = SEGMENT_WIDTH;
 	 const int GAME_FIELD_YPOS = SEGMENT_HEIGHT * 2;
 	
