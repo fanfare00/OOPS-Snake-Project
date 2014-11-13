@@ -1,5 +1,4 @@
-#ifndef SNAKEUTIL_H
-#define SNAKEUTIL_H
+#pragma once
 
 
 
@@ -12,6 +11,8 @@
 
 namespace snake
 {
+	const double scaleFactor = 1;
+
 	const int SNAKE_DIRECTION_UP = 1;
 	const int SNAKE_DIRECTION_DOWN = 2;
 	const int SNAKE_DIRECTION_LEFT = 3;
@@ -22,16 +23,14 @@ namespace snake
 	const int SCREEN_HEIGHT = 850;
 
 	//The dimensions of the dot
-	 const int SEGMENT_WIDTH = 40;
-	 const int SEGMENT_HEIGHT = 40;
+	const int SEGMENT_WIDTH = 40;
+	const int SEGMENT_HEIGHT = 40;
 
 	 const int GAME_STEP_RATE = 10;
 
 	 const int GAME_FIELD_WIDTH = SCREEN_WIDTH - SEGMENT_WIDTH * 2;
-	 const int GAME_FIELD_HEIGHT = (SCREEN_HEIGHT - SEGMENT_HEIGHT * 3)-250;
+	 const int GAME_FIELD_HEIGHT = (SCREEN_HEIGHT - SEGMENT_HEIGHT * 3) - 250;
 	 const int GAME_FIELD_XPOS = SEGMENT_WIDTH;
 	 const int GAME_FIELD_YPOS = SEGMENT_HEIGHT * 2;
 	
 }
-
-#endif /* GRANDFATHER_H */

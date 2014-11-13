@@ -1,6 +1,4 @@
-#ifndef JAMESSNAKE_H
-#define JAMESSNAKE_H
-
+#pragma once
 
 
 #include <SDL.h>
@@ -33,6 +31,7 @@ public:
 	TTF_Font *gFont;
 
 	int tW, tH;
+	
 	
 
 	class LTexture
@@ -74,15 +73,15 @@ public:
 
 		//The window renderer
 
-		
+		int mWidth;
+		int mHeight;
 
 	private:
 		//The actual hardware texture
 		
 
 		//Image dimensions
-		int mWidth;
-		int mHeight;
+
 	};
 
 	//Main loop flag
@@ -114,9 +113,11 @@ public:
 	LTexture gHeadTexture;
 	LTexture gSegmentTexture;
 	LTexture gKeyTexture;
+
 	LTexture gScoreTextTexture;
 	LTexture gMapTextTexture;
 	LTexture gBestTextTexture;
+	LTexture gBonusTextTexture;
 
 	LTexture gButtonPlayTextTexture;
 	LTexture gButtonSettingsTextTexture;
@@ -227,7 +228,7 @@ public:
 
 
 
-#endif /* JAMESSNAKE_H */
+
 
 
 

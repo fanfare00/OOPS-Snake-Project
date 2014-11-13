@@ -938,6 +938,7 @@ void JamesSnake::mainGameLoop()
 	head.mPosX = getBlockPos((GAME_FIELD_WIDTH / 2) - (GAME_FIELD_WIDTH / 6));
 	head.mPosY = getBlockPos((GAME_FIELD_HEIGHT / 2));
 
+	
 
 	//clear snake tail and add head
 	segments.clear();
@@ -959,6 +960,42 @@ void JamesSnake::mainGameLoop()
 	bonusFood.h = SEGMENT_HEIGHT;
 	bonusFood.x = 0;
 	bonusFood.y = 0;
+
+	
+
+	////test
+	//gObstacleTexture.mHeight = gObstacleTexture.mHeight * scaleFactor;
+	//gHeadTexture.mHeight = gHeadTexture.mHeight * scaleFactor;
+	//gSegmentTexture.mHeight = gSegmentTexture.mHeight * scaleFactor;
+	//gKeyTexture.mHeight = gKeyTexture.mHeight * scaleFactor;
+
+	//gScoreTextTexture.mHeight = gScoreTextTexture.mHeight * scaleFactor;
+	//gMapTextTexture.mHeight = gMapTextTexture.mHeight * scaleFactor;
+	//gBestTextTexture.mHeight = gBestTextTexture.mHeight * scaleFactor;
+	//gBonusTextTexture.mHeight = gBonusTextTexture.mHeight * scaleFactor;
+
+	//gButtonPlayTextTexture.mHeight = gButtonPlayTextTexture.mHeight * scaleFactor;
+	//gButtonSettingsTextTexture.mHeight = gButtonSettingsTextTexture.mHeight * scaleFactor;
+	//gButtonHighScoresTextTexture.mHeight = gButtonHighScoresTextTexture.mHeight * scaleFactor;
+
+
+
+	//gObstacleTexture.mWidth = gObstacleTexture.mWidth * scaleFactor;
+	//gHeadTexture.mWidth = gHeadTexture.mWidth * scaleFactor;
+	//gSegmentTexture.mWidth = gSegmentTexture.mWidth * scaleFactor;
+	//gKeyTexture.mWidth = gKeyTexture.mWidth * scaleFactor;
+
+	//gScoreTextTexture.mWidth = gScoreTextTexture.mWidth * scaleFactor;
+	//gMapTextTexture.mWidth = gMapTextTexture.mWidth * scaleFactor;
+	//gBestTextTexture.mWidth = gBestTextTexture.mWidth * scaleFactor;
+	//gBonusTextTexture.mWidth = gBonusTextTexture.mWidth * scaleFactor;
+
+	//gButtonPlayTextTexture.mWidth = gButtonPlayTextTexture.mWidth * scaleFactor;
+	//gButtonSettingsTextTexture.mWidth = gButtonSettingsTextTexture.mWidth * scaleFactor;
+	//gButtonHighScoresTextTexture.mWidth = gButtonHighScoresTextTexture.mWidth * scaleFactor;
+
+
+
 
 
 	//SDL_FillRect(gSegmentTexture.mTexture, food, SDL_mapRGB(s->format(100, 200, 300));
@@ -1058,14 +1095,23 @@ void JamesSnake::mainGameLoop()
 		SDL_SetRenderDrawColor(gRenderer, 0, 255, 100, 255);
 		SDL_RenderFillRect(gRenderer, &food);
 
-		if (bonusFood.x != 0 && bonusTimer < 15)
+		if (bonusFood.x != 0 && bonusTimer < 24)
 		{
+			SDL_Color textColor = { 0, 0, 0 };
+			if (!gBonusTextTexture.loadFromRenderedText(std::to_string(5 - (bonusTimer/5)), textColor, gRenderer, gFont))
+			{
+				printf("Failed to render text texture!\n");
+
+			}
 			SDL_SetRenderDrawColor(gRenderer, 255, 255, 0, 255);
 			SDL_RenderFillRect(gRenderer, &bonusFood);
+
+			gBonusTextTexture.render(gRenderer, bonusFood.x+10, bonusFood.y+10);
+
 			bonusTimer += segments[0].moveFactor / 1000;
 		}
 		
-		if(bonusTimer > 15)
+		if(bonusTimer > 24)
 		{ 
 			bonusTimer = 0;
 			bonusFood.x = 0;
