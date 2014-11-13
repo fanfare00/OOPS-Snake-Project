@@ -86,13 +86,31 @@ bool JamesSnake::loadMedia()
 	//Load press texture
 	if (!gSegmentTexture.loadFromFile("dot.bmp", gRenderer))
 	{
-		printf("Failed to load dot texture!\n");
+		printf("Failed to load segment texture!\n");
 		success = false;
 	}
 
 	if (!gKeyTexture.loadFromFile("keyUpDown.png", gRenderer))
 	{
-		printf("Failed to load dot texture!\n");
+		printf("Failed to load key texture!\n");
+		success = false;
+	}
+
+	if (!gHeadTexture.loadFromFile("head.png", gRenderer))
+	{
+		printf("Failed to load head texture!\n");
+		success = false;
+	}
+
+	if (!gObstacleTexture.loadFromFile("obstacle.png", gRenderer))
+	{
+		printf("Failed to load head texture!\n");
+		success = false;
+	}
+
+	if (!gButtonSelectTexture.loadFromFile("selector.png", gRenderer))
+	{
+		printf("Failed to load selector texture!\n");
 		success = false;
 	}
 
@@ -120,6 +138,10 @@ void JamesSnake::close()
 
 	//Free loaded images
 	gScoreTextTexture.free();
+
+	gButtonPlayTextTexture.free();
+	gButtonSettingsTextTexture.free();
+	gButtonHighScoresTextTexture.free();
 
 	//Free loaded images
 	gSegmentTexture.free();
@@ -216,11 +238,29 @@ void JamesSnake::setGameText()
 {
 
 	//Render text
-	SDL_Color textColor = { 0, 0, 0 };
+	SDL_Color textColor = {255, 255, 255 };
 	if (!gScoreTextTexture.loadFromRenderedText("Score " + std::to_string(score), textColor, gRenderer, gFont))
 	{
 		printf("Failed to render text texture!\n");
 		
+	}
+
+	if (!gButtonPlayTextTexture.loadFromRenderedText("play", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
+	}
+
+	if (!gButtonSettingsTextTexture.loadFromRenderedText("settings", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
+	}
+
+	if (!gButtonHighScoresTextTexture.loadFromRenderedText("high scores", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
 	}
 
 	if (!gMapTextTexture.loadFromRenderedText(mapName, textColor, gRenderer, gFont))
@@ -246,7 +286,19 @@ void JamesSnake::handleEvent(SDL_Event& e)
 		switch (e.key.keysym.sym)
 		{
 		case SDLK_UP:
-			if (segments[0].mDirection != SNAKE_DIRECTION_DOWN)
+
+			if (menuStart)
+			{
+				if (buttonSelection > 1)
+				{
+					buttonSelection -= 1;
+				}
+				else
+				{
+					buttonSelection = 3;
+				}
+			}
+			else if (segments[0].mDirection != SNAKE_DIRECTION_DOWN)
 			{
 				segments[0].mDirection = SNAKE_DIRECTION_UP;
 				segments[0].mPosXPrev = segments[0].mPosX;
@@ -268,7 +320,18 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			break;
 
 		case SDLK_DOWN:
-			if (segments[0].mDirection != SNAKE_DIRECTION_UP)
+			if (menuStart)
+			{
+				if (buttonSelection < 3)
+				{
+					buttonSelection += 1;
+				}
+				else
+				{
+					buttonSelection = 1;
+				}
+			}
+			else if (segments[0].mDirection != SNAKE_DIRECTION_UP)
 			{
 				segments[0].mDirection = SNAKE_DIRECTION_DOWN;
 				segments[0].mPosXPrev = segments[0].mPosX;
@@ -290,7 +353,11 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			break;
 
 		case SDLK_LEFT:
-			if (segments[0].mDirection != SNAKE_DIRECTION_RIGHT)
+			if (menuStart)
+			{
+
+			}
+			else if (segments[0].mDirection != SNAKE_DIRECTION_RIGHT)
 			{
 				segments[0].mDirection = SNAKE_DIRECTION_LEFT;
 				segments[0].mPosXPrev = segments[0].mPosX;
@@ -313,7 +380,11 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			break;
 
 		case SDLK_RIGHT:
-			if (segments[0].mDirection != SNAKE_DIRECTION_LEFT)
+			if (menuStart)
+			{
+
+			}
+			else if (segments[0].mDirection != SNAKE_DIRECTION_LEFT)
 			{
 				segments[0].mDirection = SNAKE_DIRECTION_RIGHT;
 				segments[0].mPosXPrev = segments[0].mPosX;
@@ -351,6 +422,14 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			
 			mainGameLoop();
 			break;
+
+		case SDLK_RETURN:
+			if (buttonSelection == 1)
+			{
+				menuStart = false;
+			}
+			
+			break;
 		}
 	}
 
@@ -365,10 +444,53 @@ void JamesSnake::spawnFood()
 
 	for (int i = 0; i < segments.size(); i++)
 	{
+
 		if ((food.x == segments[i].mCollider.x) && (food.y == segments[i].mCollider.y))
 		{
-			printf("DUPLICATE\n");
+			printf("DUPLICATE - SNAKE\n");
 			spawnFood();
+		}
+
+	}
+
+	for (int j = 0; j < obstacles.size(); j++)
+	{
+		if ((food.x == obstacles[j].x) && (food.y == obstacles[j].y))
+		{
+			printf("DUPLICATE - WALL\n");
+			spawnFood();
+		}
+	}
+
+	return;
+
+}
+
+void JamesSnake::spawnBonusFood()
+{	
+	printf("bonus spawned");
+
+	//Set the food
+	bonusFood.x = getBlockPos(((rand() % 10) * ((GAME_FIELD_WIDTH + SEGMENT_WIDTH) / 10)));
+	bonusFood.y = SEGMENT_HEIGHT + getBlockPos(((rand() % 10) * ((GAME_FIELD_HEIGHT + SEGMENT_HEIGHT) / 10)));
+
+	for (int i = 0; i < segments.size(); i++)
+	{
+
+		if ((bonusFood.x == segments[i].mCollider.x) && (bonusFood.y == segments[i].mCollider.y))
+		{
+			printf("DUPLICATE - SNAKE\n");
+			spawnBonusFood();
+		}
+
+	}
+
+	for (int j = 0; j < obstacles.size(); j++)
+	{
+		if ((bonusFood.x == obstacles[j].x) && (bonusFood.y == obstacles[j].y))
+		{
+			printf("DUPLICATE - WALL\n");
+			spawnBonusFood();
 		}
 	}
 
@@ -393,7 +515,8 @@ void JamesSnake::addSnakeSegment()
 void JamesSnake::renderSnake()
 {
 
-	for (int i = 0; i < segments.size(); i++)
+	gHeadTexture.render(gRenderer, segments[0].mPosX, segments[0].mPosY);
+	for (int i = 1; i < segments.size(); i++)
 	{
 		//Show the dot
 		gSegmentTexture.render(gRenderer, segments[i].mPosX, segments[i].mPosY);
@@ -583,12 +706,222 @@ void JamesSnake::LTexture::render(SDL_Renderer* gRenderer, int x, int y, SDL_Rec
 	SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
 }
 
+void JamesSnake::showButtonMenu(int buttonSelected)
+{
+
+
+	SDL_Rect b1;
+	b1.w = SCREEN_WIDTH / 2;
+	b1.h = 70;
+	b1.x = SCREEN_WIDTH/4;
+	b1.y = SCREEN_HEIGHT - SCREEN_HEIGHT/3.3;
+
+	SDL_Rect b2;
+	b2.w = SCREEN_WIDTH / 2;
+	b2.h = 70;
+	b2.x = 0 + SCREEN_WIDTH / 4;
+	b2.y = b1.y + b2.h + 7;
+
+	SDL_Rect b3;
+	b3.w = SCREEN_WIDTH / 2;
+	b3.h = 70;
+	b3.x = 0 + SCREEN_WIDTH / 4;
+	b3.y = b2.y + b3.h + 7;
+
+	SDL_Rect clear;
+	clear.w = b1.w + 20;
+	clear.h = b1.h + b2.h + b3.h + 36;
+	clear.x = b1.x - 10;
+	clear.y = b1.y - 10;
+
+	SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+	SDL_RenderFillRect(gRenderer, &clear);
+
+
+	SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+	SDL_RenderFillRect(gRenderer, &b1);
+
+	SDL_SetRenderDrawColor(gRenderer, 255, 0, 170, 255);
+	SDL_RenderFillRect(gRenderer, &b2);
+
+	SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+	SDL_RenderFillRect(gRenderer, &b3);
+
+	
+
+	TTF_SizeText(gFont, "play", &tW, &tH);
+	gButtonPlayTextTexture.render(gRenderer, b1.x + (b1.w / 2) - tW/2, b1.y + (b1.h /2 ) -tH/2);
+
+	TTF_SizeText(gFont, "settings", &tW, &tH);
+	gButtonSettingsTextTexture.render(gRenderer, b2.x + (b2.w / 2) - tW / 2, b2.y + (b2.h / 2) - tH / 2);
+
+	TTF_SizeText(gFont, "high scores", &tW, &tH);
+	gButtonHighScoresTextTexture.render(gRenderer, b3.x + (b3.w / 2) - tW / 2, b3.y + (b3.h / 2) - tH / 2);
+
+	if (buttonSelected == 1)
+	{
+		gButtonSelectTexture.render(gRenderer, b1.x - 8, b1.y-7);
+	}
+	else if (buttonSelected == 2)
+	{
+		gButtonSelectTexture.render(gRenderer, b2.x - 8, b2.y - 7);
+	}
+	else if (buttonSelected == 3)
+	{
+		gButtonSelectTexture.render(gRenderer, b3.x - 8, b3.y - 7);
+	}
+}
+
+void JamesSnake::setupObstacles()
+{
+	obstacles.clear();
+	for (int i = 0; i < 24; i++)
+	{
+		SDL_Rect k;
+		k.w = SEGMENT_WIDTH;
+		k.h = SEGMENT_HEIGHT;
+
+		obstacles.push_back(k);
+	}
+
+	//UPPER LEFT BLOCKADE
+	obstacles[0].x = GAME_FIELD_XPOS;
+	obstacles[0].y = GAME_FIELD_YPOS;
+
+		obstacles[1].x = GAME_FIELD_XPOS + SEGMENT_WIDTH;
+		obstacles[1].y = GAME_FIELD_YPOS;
+
+		obstacles[2].x = GAME_FIELD_XPOS + SEGMENT_WIDTH*2;
+		obstacles[2].y = GAME_FIELD_YPOS;
+
+		obstacles[3].x = GAME_FIELD_XPOS + SEGMENT_WIDTH * 3;
+		obstacles[3].y = GAME_FIELD_YPOS;
+
+		obstacles[4].x = GAME_FIELD_XPOS;
+		obstacles[4].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT;
+
+		obstacles[5].x = GAME_FIELD_XPOS;
+		obstacles[5].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT*2;
+
+		
+	//UPPER RIGHT BLOCKADE
+	obstacles[6].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH;
+	obstacles[6].y = GAME_FIELD_YPOS;
+
+	obstacles[7].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH*2;
+	obstacles[7].y = GAME_FIELD_YPOS;
+
+	obstacles[8].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH*3;
+	obstacles[8].y = GAME_FIELD_YPOS;
+
+	obstacles[9].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH*4;
+	obstacles[9].y = GAME_FIELD_YPOS;
+
+	obstacles[10].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH;
+	obstacles[10].y = GAME_FIELD_YPOS+SEGMENT_HEIGHT;
+
+	obstacles[11].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH;
+	obstacles[11].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT*2;
+
+
+
+	//LOWER RIGHT BLOCKADE
+	obstacles[12].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH;
+	obstacles[12].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[13].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH;
+	obstacles[13].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT*2;
+
+	obstacles[14].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH;
+	obstacles[14].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT*3;
+
+	obstacles[15].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH*2;
+	obstacles[15].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[16].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH*3;
+	obstacles[16].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[17].x = GAME_FIELD_XPOS + GAME_FIELD_WIDTH - SEGMENT_WIDTH*4;
+	obstacles[17].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	//LOWER LEFT BLOCKADE
+	obstacles[18].x = GAME_FIELD_XPOS;
+	obstacles[18].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[19].x = GAME_FIELD_XPOS + SEGMENT_WIDTH;
+	obstacles[19].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[20].x = GAME_FIELD_XPOS + SEGMENT_WIDTH *2;
+	obstacles[20].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[21].x = GAME_FIELD_XPOS + SEGMENT_WIDTH*3;
+	obstacles[21].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+	obstacles[22].x = GAME_FIELD_XPOS;
+	obstacles[22].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT*2;
+
+	obstacles[23].x = GAME_FIELD_XPOS;
+	obstacles[23].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT*3;
+}
+
+void JamesSnake::renderObstacles()
+{
+	for (int i = 0; i < obstacles.size(); i++)
+	{
+		gObstacleTexture.render(gRenderer, obstacles[i].x, obstacles[i].y);
+
+
+	}
+}
+
+void JamesSnake::checkObstacleCollision()
+{
+	for (int i = 0; i < obstacles.size(); i++)
+	{
+
+		if (checkCollision(segments[0].mCollider, obstacles[i]))
+		{
+			printf("YOU LOSE");
+			mainGameLoop();
+		}
+	}
+}
+
+void JamesSnake::checkBoundaryCollision()
+{
+	//If the snake collided or went too far to the left or right
+	if (segments[0].mPosX + SEGMENT_WIDTH > (GAME_FIELD_WIDTH + GAME_FIELD_XPOS))
+	{
+		//mainGameLoop();
+		segments[0].mPosX = GAME_FIELD_XPOS;
+	}
+
+	if (segments[0].mPosX < GAME_FIELD_XPOS)
+	{
+		segments[0].mPosX = GAME_FIELD_WIDTH;
+	}
+
+	//If the dot collided or went too far up or down
+	if ((segments[0].mPosY + SEGMENT_HEIGHT >(GAME_FIELD_HEIGHT + GAME_FIELD_YPOS)))
+	{
+		//mainGameLoop();
+		segments[0].mPosY = GAME_FIELD_YPOS;
+	}
+
+	if (segments[0].mPosY < GAME_FIELD_YPOS)
+	{
+		segments[0].mPosY = GAME_FIELD_HEIGHT+SEGMENT_HEIGHT;
+	}
+}
 
 
 void JamesSnake::mainGameLoop()
 {
+	menuStart = true;
+
 	srand(time(NULL));
 
+	bonusTimer = 0;
 	score = 0;
 	setGameText();
 
@@ -611,8 +944,10 @@ void JamesSnake::mainGameLoop()
 	segments.push_back(head);
 	addSnakeSegment();
 	addSnakeSegment();
-	updateSnake();
 
+	
+	//set obstacles
+	setupObstacles();
 
 	food.w = SEGMENT_WIDTH;
 	food.h = SEGMENT_HEIGHT;
@@ -620,11 +955,19 @@ void JamesSnake::mainGameLoop()
 	food.x = getBlockPos((GAME_FIELD_WIDTH / 2) + (GAME_FIELD_WIDTH / 6));
 	food.y = getBlockPos((GAME_FIELD_HEIGHT / 2));
 
+	bonusFood.w = SEGMENT_WIDTH;
+	bonusFood.h = SEGMENT_HEIGHT;
+	bonusFood.x = 0;
+	bonusFood.y = 0;
+
+
 	//SDL_FillRect(gSegmentTexture.mTexture, food, SDL_mapRGB(s->format(100, 200, 300));
 
 	//While application is running
 	while (!quit)
 	{
+
+
 		if (pause)
 		{
 			while (true)
@@ -640,6 +983,8 @@ void JamesSnake::mainGameLoop()
 				}
 			}
 		}
+
+
 
 		//Handle events on queue
 		while (SDL_PollEvent(&e) != 0)
@@ -668,6 +1013,25 @@ void JamesSnake::mainGameLoop()
 			setGameText();
 			addSnakeSegment();
 			spawnFood();
+
+			if (score > 0 && score % 5 == 0)
+			{
+				bonusTimer = 0;
+				spawnBonusFood();
+			}
+		}
+
+		if (checkCollision(segments[0].mCollider, bonusFood))
+		{
+			bonusFood.x = 0;
+			bonusFood.y = 0;
+			score += 1;
+			if (score > bestScore)
+			{
+				bestScore += 1;
+			}
+			setGameText();
+			addSnakeSegment();
 		}
 
 		for (int i = 1; i < segments.size(); i++)
@@ -680,20 +1044,13 @@ void JamesSnake::mainGameLoop()
 			}
 
 		}
-		//If the snake collided or went too far to the left or right
-		if ((segments[0].mPosX < GAME_FIELD_XPOS) || (segments[0].mPosX + SEGMENT_WIDTH >(GAME_FIELD_WIDTH + GAME_FIELD_XPOS)))
-		{
-			mainGameLoop();
-		}
 
-		//If the dot collided or went too far up or down
-		if ((segments[0].mPosY < GAME_FIELD_YPOS) || (segments[0].mPosY + SEGMENT_HEIGHT >(GAME_FIELD_HEIGHT + GAME_FIELD_YPOS)))
-		{
-			mainGameLoop();
-		}
+		checkObstacleCollision();
+		checkBoundaryCollision();
+
 
 		//Clear screen
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gRenderer);
 
 		//Render food
@@ -701,8 +1058,27 @@ void JamesSnake::mainGameLoop()
 		SDL_SetRenderDrawColor(gRenderer, 0, 255, 100, 255);
 		SDL_RenderFillRect(gRenderer, &food);
 
+		if (bonusFood.x != 0 && bonusTimer < 15)
+		{
+			SDL_SetRenderDrawColor(gRenderer, 255, 255, 0, 255);
+			SDL_RenderFillRect(gRenderer, &bonusFood);
+			bonusTimer += segments[0].moveFactor / 1000;
+		}
+		
+		if(bonusTimer > 15)
+		{ 
+			bonusTimer = 0;
+			bonusFood.x = 0;
+			bonusFood.y = 0;
+
+		}
+
+
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
 		SDL_RenderDrawRect(gRenderer, &field);
+
+
+		renderObstacles();
 
 		//Update Snake Chain
 		updateSnake();
@@ -717,10 +1093,34 @@ void JamesSnake::mainGameLoop()
 
 		gBestTextTexture.render(gRenderer, SCREEN_WIDTH - 175, 25);
 
-		gKeyTexture.render(gRenderer, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 225);
+		gKeyTexture.render(gRenderer, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250);
+
+		
+
+		
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
+
+		if (menuStart)
+		{
+			while (true)
+			{
+				
+				while (SDL_PollEvent(&e) != 0)
+				{
+					handleEvent(e);
+				}
+
+				if (!menuStart)
+				{
+					break;
+				}
+
+				showButtonMenu(buttonSelection);
+				SDL_RenderPresent(gRenderer);
+			}
+		}
 	}
 
 

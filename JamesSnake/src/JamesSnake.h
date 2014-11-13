@@ -88,9 +88,14 @@ public:
 	//Main loop flag
 	bool quit = false;
 
+	bool menuStart = true;
+
 	//
 	bool pause = false;
 
+	int buttonSelection = 1;
+
+	int bonusTimer = 0;
 
 	//
 	int score = 0;
@@ -102,15 +107,28 @@ public:
 
 
 	SDL_Rect food;
+	SDL_Rect bonusFood;
 
 	//Scene textures
+	LTexture gObstacleTexture;
+	LTexture gHeadTexture;
 	LTexture gSegmentTexture;
 	LTexture gKeyTexture;
 	LTexture gScoreTextTexture;
 	LTexture gMapTextTexture;
 	LTexture gBestTextTexture;
 
+	LTexture gButtonPlayTextTexture;
+	LTexture gButtonSettingsTextTexture;
+	LTexture gButtonHighScoresTextTexture;
+
+	LTexture gButtonSelectTexture;
+	
+
+
 	 std::vector<SnakeSegment> segments;
+	 
+	 std::vector<SDL_Rect> obstacles;
 
 
 	static JamesSnake& getInstance();
@@ -142,6 +160,9 @@ public:
 	void spawnFood();
 
 	//
+	void spawnBonusFood();
+
+	//
 	void addSnakeSegment();
 
 	//
@@ -155,7 +176,15 @@ public:
 
 	//static int threadFunction(void* data);
 
+	void showButtonMenu(int buttonSelected);
 
+	void setupObstacles();
+
+	void renderObstacles();
+
+	void checkObstacleCollision();
+
+	void checkBoundaryCollision();
 };
 
 
