@@ -32,7 +32,8 @@ public:
 
 	int tW, tH;
 	
-	
+	std::string nameBuffer;
+	std::string userName;
 
 	class LTexture
 	{
@@ -89,12 +90,20 @@ public:
 
 	bool menuStart = true;
 
+	bool gettingName = false;
+
+	bool gameOver = false;
+
+	bool settingsMenu = false;
+
 	//
 	bool pause = false;
 
 	int buttonSelection = 1;
 
 	int bonusTimer = 0;
+
+	int cursorBlinkTimer = 0;
 
 	//
 	int score = 0;
@@ -118,6 +127,11 @@ public:
 	LTexture gMapTextTexture;
 	LTexture gBestTextTexture;
 	LTexture gBonusTextTexture;
+
+
+	LTexture gGameOverTextTexture;
+	LTexture gEnterNameTexture;
+	LTexture gNameBufferTexture;
 
 	LTexture gButtonPlayTextTexture;
 	LTexture gButtonSettingsTextTexture;
@@ -186,6 +200,10 @@ public:
 	void checkObstacleCollision();
 
 	void checkBoundaryCollision();
+
+	void getUserName();
+
+	void mainMenuLoop();
 };
 
 

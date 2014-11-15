@@ -84,7 +84,7 @@ bool JamesSnake::loadMedia()
 	bool success = true;
 
 	//Load press texture
-	if (!gSegmentTexture.loadFromFile("dot.bmp", gRenderer))
+	if (!gSegmentTexture.loadFromFile("dot.png", gRenderer))
 	{
 		printf("Failed to load segment texture!\n");
 		success = false;
@@ -274,6 +274,13 @@ void JamesSnake::setGameText()
 		printf("Failed to render text texture!\n");
 
 	}
+
+	textColor = { 255, 0, 0 };
+	if (!gGameOverTextTexture.loadFromRenderedText("game over", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
+	}
 }
 
 void JamesSnake::handleEvent(SDL_Event& e)
@@ -406,29 +413,67 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			break;
 
 		case SDLK_p:
-			if (!pause)
+			if (!gettingName)
 			{
-				pause = true;
-				printf("pause");
-			}
-			else
-			{
-				pause = false;
-				printf("NOT pause");
+				if (!pause)
+				{
+					pause = true;
+					printf("pause");
+					printf((char*)userName.c_str());
+				}
+				else
+				{
+					pause = false;
+					printf("NOT pause");
+				}
 			}
 			break;
 
 		case SDLK_r:
-			
-			mainGameLoop();
+			if (!gettingName)
+			{
+				mainGameLoop();
+			}
+			break;
+
+		case SDLK_BACKSPACE:
+			if (gettingName)
+			{
+				if (nameBuffer.length() > 0)
+				{
+					nameBuffer.pop_back();
+
+				}
+				
+			}
+
 			break;
 
 		case SDLK_RETURN:
-			if (buttonSelection == 1)
+			if (gettingName == true)
 			{
-				menuStart = false;
+				userName = nameBuffer;
+				gettingName = false;
 			}
-			
+
+			if ((menuStart == true))
+			{
+				if (buttonSelection == 1)
+				{
+					if (userName.length() == 0)
+					{
+						gettingName = true;
+					}
+					
+					menuStart = false;
+					mainGameLoop();
+				}
+				if (buttonSelection == 2)
+				{
+					menuStart = false;
+					settingsMenu = true;
+				}
+			}
 			break;
 		}
 	}
@@ -515,13 +560,14 @@ void JamesSnake::addSnakeSegment()
 void JamesSnake::renderSnake()
 {
 
-	gHeadTexture.render(gRenderer, segments[0].mPosX, segments[0].mPosY);
+	
 	for (int i = 1; i < segments.size(); i++)
 	{
 		//Show the dot
 		gSegmentTexture.render(gRenderer, segments[i].mPosX, segments[i].mPosY);
 		
 	}
+	gHeadTexture.render(gRenderer, segments[0].mPosX, segments[0].mPosY);
 }
 
 void JamesSnake::updateSnake()
@@ -881,8 +927,10 @@ void JamesSnake::checkObstacleCollision()
 
 		if (checkCollision(segments[0].mCollider, obstacles[i]))
 		{
-			printf("YOU LOSE");
-			mainGameLoop();
+			gameOver = true;
+
+			menuStart = true;
+			//mainGameLoop();
 		}
 	}
 }
@@ -914,10 +962,133 @@ void JamesSnake::checkBoundaryCollision()
 	}
 }
 
+void JamesSnake::getUserName()
+{
+	SDL_Rect nameUnderline;
+	nameUnderline.w = SCREEN_WIDTH / 2;
+	nameUnderline.h = 3;
+	nameUnderline.x = SCREEN_WIDTH / 4;
+	nameUnderline.y = (SCREEN_HEIGHT / 2) + 10;
+
+	SDL_Rect nameClear;
+	nameClear.w = SCREEN_WIDTH / 2;
+	nameClear.h = 43;
+	nameClear.x = SCREEN_WIDTH / 4;
+	nameClear.y = (SCREEN_HEIGHT / 2) - 35;
+
+	cursorBlinkTimer = 0;
+	while (!quit)
+	{
+		SDL_Delay(GAME_STEP_RATE);
+		cursorBlinkTimer += 18;
+		while (SDL_PollEvent(&e) != 0)
+		{
+
+			//User requests quit
+			if (e.type == SDL_QUIT)
+			{
+				quit = true;
+			}
+
+			if (e.key.type == SDL_KEYDOWN)
+			{
+				std::string test(SDL_GetKeyName(e.key.keysym.sym));
+				if ((test.length() == 1) && (nameBuffer.length() < 22))
+				{
+					nameBuffer += SDL_GetKeyName(e.key.keysym.sym);
+
+				}
+			}
+
+			handleEvent(e);
+			SDL_Color textColor = { 255, 255, 0 };
+			if (!gNameBufferTexture.loadFromRenderedText(nameBuffer, textColor, gRenderer, gFont))
+			{
+				printf("Failed to render text texture!\n");
+
+			}
+		}
+
+		if (!gettingName)
+		{
+			break;
+		}
+
+
+		TTF_SizeText(gFont, "enter your name", &tW, &tH);
+		SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+
+		gEnterNameTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (SCREEN_HEIGHT / 2) - tH * 2);
+
+		//clearing rect
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(gRenderer, &nameClear);
+
+		TTF_SizeText(gFont, (char*)nameBuffer.c_str(), &tW, &tH);
+		gNameBufferTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (SCREEN_HEIGHT / 2) - tH * 2 + 45);
+
+		SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+		SDL_RenderFillRect(gRenderer, &nameUnderline);
+
+
+
+		//draws blinking cursor
+		if (cursorBlinkTimer > 500)
+		{
+			SDL_RenderDrawLine(gRenderer, nameUnderline.w + (tW / 2), nameUnderline.y - 35, nameUnderline.w + (tW / 2), nameUnderline.y - 7);
+
+			if (cursorBlinkTimer > 1000)
+			{
+				//SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
+				//SDL_RenderDrawLine(gRenderer, nameUnderline.w, nameUnderline.y - 35, nameUnderline.w, nameUnderline.y - 7);
+				cursorBlinkTimer = 0;
+			}
+		}
+
+
+
+		SDL_RenderPresent(gRenderer);
+	}
+}
+
+void JamesSnake::mainMenuLoop()
+{
+	while (!quit)
+	{
+
+		while (SDL_PollEvent(&e) != 0)
+		{
+
+			//User requests quit
+			if (e.type == SDL_QUIT)
+			{
+				quit = true;
+			}
+
+			handleEvent(e);
+		}
+
+		if (!menuStart)
+		{
+			break;
+		}
+		if (gameOver)
+		{
+			TTF_SizeText(gFont, "game over", &tW, &tH);
+			gGameOverTextTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (GAME_FIELD_HEIGHT / 2));
+		}
+
+		showButtonMenu(buttonSelection);
+		SDL_RenderPresent(gRenderer);
+
+
+	}
+}
+
 
 void JamesSnake::mainGameLoop()
 {
-	menuStart = true;
+	//menuStart = true;
 
 	srand(time(NULL));
 
@@ -995,7 +1166,15 @@ void JamesSnake::mainGameLoop()
 	//gButtonHighScoresTextTexture.mWidth = gButtonHighScoresTextTexture.mWidth * scaleFactor;
 
 
+	SDL_Color textColor = { 255, 255, 255 };
+	if (!gEnterNameTexture.loadFromRenderedText("enter your name", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
 
+	}
+
+
+	gameOver = false;
 
 
 	//SDL_FillRect(gSegmentTexture.mTexture, food, SDL_mapRGB(s->format(100, 200, 300));
@@ -1003,7 +1182,7 @@ void JamesSnake::mainGameLoop()
 	//While application is running
 	while (!quit)
 	{
-
+		
 
 		if (pause)
 		{
@@ -1075,12 +1254,15 @@ void JamesSnake::mainGameLoop()
 		{
 			if (checkCollision(segments[0].mCollider, segments[i].mCollider))
 			{
-				printf("YOU LOSE");
-				mainGameLoop();
+				gameOver = true;
+
+				menuStart = true;
 				
 			}
 
 		}
+
+		
 
 		checkObstacleCollision();
 		checkBoundaryCollision();
@@ -1119,10 +1301,12 @@ void JamesSnake::mainGameLoop()
 
 		}
 
-
+		//print blue square game field
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0xFF, 0xFF);
 		SDL_RenderDrawRect(gRenderer, &field);
 
+
+		
 
 		renderObstacles();
 
@@ -1132,42 +1316,62 @@ void JamesSnake::mainGameLoop()
 		//Render segments	
 		renderSnake();
 
+		//print score, map name, best score
 		gScoreTextTexture.render(gRenderer, 40, 25);
-		
 		TTF_SizeText(gFont, (char*)mapName.c_str(), &tW, &tH);
 		gMapTextTexture.render(gRenderer, (SCREEN_WIDTH/2) - (tW/2), 25);
-
 		gBestTextTexture.render(gRenderer, SCREEN_WIDTH - 175, 25);
 
 		gKeyTexture.render(gRenderer, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250);
 
-		
-
-		
 
 		//Update screen
 		SDL_RenderPresent(gRenderer);
 
 		if (menuStart)
 		{
+			mainMenuLoop();
+		}
+
+		if (gettingName)
+		{
+			getUserName();
+		}
+
+		if (settingsMenu)
+		{
+
+
 			while (true)
 			{
-				
 				while (SDL_PollEvent(&e) != 0)
 				{
+
+					//User requests quit
+					if (e.type == SDL_QUIT)
+					{
+						quit = true;
+					}
+
 					handleEvent(e);
 				}
 
-				if (!menuStart)
+				if (!settingsMenu)
 				{
 					break;
 				}
+				//Clear screen
+				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
+				SDL_RenderClear(gRenderer);
 
-				showButtonMenu(buttonSelection);
+				//Update screen
 				SDL_RenderPresent(gRenderer);
+
 			}
 		}
+
 	}
+
 
 
 
