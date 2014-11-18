@@ -32,6 +32,7 @@ public:
 
 	int tW, tH;
 	
+	std::vector<std::string>mapNames;
 	std::string nameBuffer;
 	std::string userName;
 
@@ -85,8 +86,12 @@ public:
 
 	};
 
+	
+
 	//Main loop flag
 	bool quit = false;
+
+	int mapNumber = 1;
 
 	bool menuStart = true;
 
@@ -95,6 +100,10 @@ public:
 	bool gameOver = false;
 
 	bool settingsMenu = false;
+
+	bool highScoresMenu = false;
+
+	bool writeScore = true;
 
 	//
 	bool pause = false;
@@ -138,6 +147,8 @@ public:
 	LTexture gButtonHighScoresTextTexture;
 
 	LTexture gButtonSelectTexture;
+
+	LTexture gHighScoresTextTexture;
 	
 
 
@@ -193,6 +204,8 @@ public:
 
 	void showButtonMenu(int buttonSelected);
 
+	void showHighScoresMenu();
+
 	void setupObstacles();
 
 	void renderObstacles();
@@ -204,6 +217,8 @@ public:
 	void getUserName();
 
 	void mainMenuLoop();
+
+	void highScoresMenuLoop();
 };
 
 

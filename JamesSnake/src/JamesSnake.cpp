@@ -1,4 +1,6 @@
 #include "JamesSnake.h"
+#include <iostream>
+#include <fstream>
 
 
 JamesSnake::~JamesSnake()
@@ -16,6 +18,10 @@ JamesSnake& JamesSnake::getInstance()
 
 bool JamesSnake::init()
 {
+	mapNames.push_back("Meadow");
+	mapNames.push_back("Garden");
+	mapNames.push_back("Jungle");
+
 	//Initialization flag
 	bool success = true;
 
@@ -263,11 +269,7 @@ void JamesSnake::setGameText()
 
 	}
 
-	if (!gMapTextTexture.loadFromRenderedText(mapName, textColor, gRenderer, gFont))
-	{
-		printf("Failed to render text texture!\n");
 
-	}
 
 	if (!gBestTextTexture.loadFromRenderedText("Best " + std::to_string(bestScore), textColor, gRenderer, gFont))
 	{
@@ -360,9 +362,17 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			break;
 
 		case SDLK_LEFT:
-			if (menuStart)
+			if (menuStart || highScoresMenu)
 			{
-
+				if (mapNumber > 1)
+				{
+					mapNumber -= 1;
+				}
+				else
+				{
+					mapNumber = 3;
+				}
+				mainGameLoop();
 			}
 			else if (segments[0].mDirection != SNAKE_DIRECTION_RIGHT)
 			{
@@ -387,9 +397,17 @@ void JamesSnake::handleEvent(SDL_Event& e)
 			break;
 
 		case SDLK_RIGHT:
-			if (menuStart)
+			if (menuStart || highScoresMenu)
 			{
-
+				if (mapNumber < 3)
+				{
+					mapNumber += 1;
+				}
+				else
+				{
+					mapNumber = 1;
+				}
+				mainGameLoop();
 			}
 			else if (segments[0].mDirection != SNAKE_DIRECTION_LEFT)
 			{
@@ -473,6 +491,22 @@ void JamesSnake::handleEvent(SDL_Event& e)
 					menuStart = false;
 					settingsMenu = true;
 				}
+
+				if (buttonSelection == 3)
+				{
+					highScoresMenu = true;
+					menuStart = false;
+					mainGameLoop();
+	
+				}
+			}
+
+			if (highScoresMenu)
+			{
+				
+				highScoresMenu = false;
+				menuStart = true;
+				mainGameLoop();
 			}
 			break;
 		}
@@ -754,7 +788,12 @@ void JamesSnake::LTexture::render(SDL_Renderer* gRenderer, int x, int y, SDL_Rec
 
 void JamesSnake::showButtonMenu(int buttonSelected)
 {
+	SDL_Color textColor = { 255, 255, 255 };
+	if (!gButtonPlayTextTexture.loadFromRenderedText("play", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
 
+	}
 
 	SDL_Rect b1;
 	b1.w = SCREEN_WIDTH / 2;
@@ -804,6 +843,8 @@ void JamesSnake::showButtonMenu(int buttonSelected)
 	TTF_SizeText(gFont, "high scores", &tW, &tH);
 	gButtonHighScoresTextTexture.render(gRenderer, b3.x + (b3.w / 2) - tW / 2, b3.y + (b3.h / 2) - tH / 2);
 
+	
+
 	if (buttonSelected == 1)
 	{
 		gButtonSelectTexture.render(gRenderer, b1.x - 8, b1.y-7);
@@ -830,24 +871,28 @@ void JamesSnake::setupObstacles()
 		obstacles.push_back(k);
 	}
 
+	if (mapNumber == 1)
+	{
+
+
 	//UPPER LEFT BLOCKADE
 	obstacles[0].x = GAME_FIELD_XPOS;
 	obstacles[0].y = GAME_FIELD_YPOS;
 
-		obstacles[1].x = GAME_FIELD_XPOS + SEGMENT_WIDTH;
-		obstacles[1].y = GAME_FIELD_YPOS;
+	obstacles[1].x = GAME_FIELD_XPOS + SEGMENT_WIDTH;
+	obstacles[1].y = GAME_FIELD_YPOS;
 
-		obstacles[2].x = GAME_FIELD_XPOS + SEGMENT_WIDTH*2;
-		obstacles[2].y = GAME_FIELD_YPOS;
+	obstacles[2].x = GAME_FIELD_XPOS + SEGMENT_WIDTH*2;
+	obstacles[2].y = GAME_FIELD_YPOS;
 
-		obstacles[3].x = GAME_FIELD_XPOS + SEGMENT_WIDTH * 3;
-		obstacles[3].y = GAME_FIELD_YPOS;
+	obstacles[3].x = GAME_FIELD_XPOS + SEGMENT_WIDTH * 3;
+	obstacles[3].y = GAME_FIELD_YPOS;
 
-		obstacles[4].x = GAME_FIELD_XPOS;
-		obstacles[4].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT;
+	obstacles[4].x = GAME_FIELD_XPOS;
+	obstacles[4].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT;
 
-		obstacles[5].x = GAME_FIELD_XPOS;
-		obstacles[5].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT*2;
+	obstacles[5].x = GAME_FIELD_XPOS;
+	obstacles[5].y = GAME_FIELD_YPOS + SEGMENT_HEIGHT*2;
 
 		
 	//UPPER RIGHT BLOCKADE
@@ -908,6 +953,111 @@ void JamesSnake::setupObstacles()
 
 	obstacles[23].x = GAME_FIELD_XPOS;
 	obstacles[23].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT*3;
+
+	}
+
+	if (mapNumber == 2)
+	{
+		SDL_Rect k;
+		k.w = SEGMENT_WIDTH;
+		k.h = SEGMENT_HEIGHT;
+
+		obstacles.push_back(k);
+
+		obstacles[0].x = GAME_FIELD_XPOS + (GAME_FIELD_WIDTH / 2);
+		obstacles[0].y = GAME_FIELD_YPOS;
+
+		for (int i = 1; i < 12; i++)
+		{
+			obstacles[i].x = obstacles[i - 1].x;
+			obstacles[i].y = obstacles[i - 1].y + SEGMENT_HEIGHT;
+		}
+
+		obstacles[13].x = GAME_FIELD_XPOS + (GAME_FIELD_WIDTH / 2) - SEGMENT_WIDTH;
+		obstacles[13].y = GAME_FIELD_YPOS;
+
+		for (int i = 1; i < 12; i++)
+		{
+			obstacles[13+i].x = obstacles[13+i - 1].x;
+			obstacles[13+i].y = obstacles[13+i - 1].y + SEGMENT_HEIGHT;
+		}
+
+
+	}
+
+	if (mapNumber == 3)
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			SDL_Rect k;
+			k.w = SEGMENT_WIDTH;
+			k.h = SEGMENT_HEIGHT;
+
+			obstacles.push_back(k);
+		}
+
+		obstacles[0].x = GAME_FIELD_XPOS + (GAME_FIELD_WIDTH / 3);
+		obstacles[0].y = GAME_FIELD_YPOS;
+
+		//up/down
+		for (int i = 1; i < 5; i++)
+		{
+			obstacles[i].x = obstacles[i - 1].x;
+			obstacles[i].y = obstacles[i - 1].y + SEGMENT_HEIGHT;
+		}
+
+
+		obstacles[7].x = GAME_FIELD_WIDTH - (GAME_FIELD_WIDTH / 3);
+		obstacles[7].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+		for (int i = 1; i < 5; i++)
+		{
+			
+			obstacles[7 + i].x = obstacles[7].x;
+			obstacles[7 + i].y = obstacles[(i + 7) - 1].y - SEGMENT_WIDTH;
+		}
+
+		for (int i = 1; i < 7; i++)
+		{
+
+			obstacles[11+i].y = obstacles[11].y;
+			obstacles[11 + i].x = obstacles[(i + 11) - 1].x + SEGMENT_WIDTH;
+		}
+
+		obstacles[18].x = obstacles[4].x - SEGMENT_WIDTH;
+		obstacles[18].y = obstacles[4].y;
+
+		for (int i = 1; i < 6; i++)
+		{
+			obstacles[18 + i].x = obstacles[(i+18) - 1].x - SEGMENT_WIDTH;
+			obstacles[18+i].y = obstacles[18].y;
+		}
+
+		////left/right
+		//for (int i = 1; i < 7; i++)
+		//{
+		//	obstacles[13 + i].x = obstacles[(i+13) - 1].x + SEGMENT_WIDTH;
+		//	obstacles[13 + i].y = obstacles[13].y;
+		//}
+
+		//obstacles[20].x = GAME_FIELD_WIDTH - (GAME_FIELD_WIDTH / 3);
+		//obstacles[20].y = GAME_FIELD_YPOS + GAME_FIELD_HEIGHT - SEGMENT_HEIGHT;
+
+		//for (int i = 1; i < 5; i++)
+		//{
+		//	
+		//	obstacles[20 + i].x = obstacles[20].x;
+		//	obstacles[20 + i].y = obstacles[(i + 20) - 1].y - SEGMENT_WIDTH;
+		//}
+
+		//for (int i = 1; i < 7; i++)
+		//{
+
+		//	obstacles[26+i].y = obstacles[26].y;
+		//	obstacles[26 + i].x = obstacles[(i + 26) - 1].x + SEGMENT_WIDTH;
+		//}
+
+	}
 }
 
 void JamesSnake::renderObstacles()
@@ -962,20 +1112,34 @@ void JamesSnake::checkBoundaryCollision()
 	}
 }
 
+
+
 void JamesSnake::getUserName()
 {
+	bool fadeBack = true;
+	SDL_SetRenderDrawBlendMode(gRenderer, SDL_BLENDMODE_BLEND);
+
 	SDL_Rect nameUnderline;
 	nameUnderline.w = SCREEN_WIDTH / 2;
 	nameUnderline.h = 3;
 	nameUnderline.x = SCREEN_WIDTH / 4;
-	nameUnderline.y = (SCREEN_HEIGHT / 2) + 10;
+	nameUnderline.y = GAME_FIELD_YPOS + (GAME_FIELD_HEIGHT / 2) + 10;
 
 	SDL_Rect nameClear;
 	nameClear.w = SCREEN_WIDTH / 2;
 	nameClear.h = 43;
 	nameClear.x = SCREEN_WIDTH / 4;
-	nameClear.y = (SCREEN_HEIGHT / 2) - 35;
+	nameClear.y = GAME_FIELD_YPOS + (GAME_FIELD_HEIGHT / 2) - 35;
 
+	SDL_Rect tests;
+	tests.w = SCREEN_WIDTH;
+	tests.h = SCREEN_HEIGHT;
+	tests.x = 0;
+	tests.y = 0;
+
+
+
+	
 	cursorBlinkTimer = 0;
 	while (!quit)
 	{
@@ -1014,18 +1178,39 @@ void JamesSnake::getUserName()
 			break;
 		}
 
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 3);
+		SDL_RenderFillRect(gRenderer, &tests);
+
 
 		TTF_SizeText(gFont, "enter your name", &tW, &tH);
 		SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 
-		gEnterNameTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (SCREEN_HEIGHT / 2) - tH * 2);
+		gEnterNameTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), GAME_FIELD_YPOS + (GAME_FIELD_HEIGHT / 2) - tH * 2);
 
 		//clearing rect
 		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
 		SDL_RenderFillRect(gRenderer, &nameClear);
+		
+
+		//renderObstacles();
+
+		//if (fadeBack == true)
+		//{
+		//	
+		//	SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 155);
+		//	SDL_RenderFillRect(gRenderer, &tests);
+		//	fadeBack = false;
+		//}
+
+
+
+		TTF_SizeText(gFont, "enter your name", &tW, &tH);
+		SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
+
+		gEnterNameTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), GAME_FIELD_YPOS + (GAME_FIELD_HEIGHT / 2) - tH * 2);
 
 		TTF_SizeText(gFont, (char*)nameBuffer.c_str(), &tW, &tH);
-		gNameBufferTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (SCREEN_HEIGHT / 2) - tH * 2 + 45);
+		gNameBufferTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), GAME_FIELD_YPOS + (GAME_FIELD_HEIGHT / 2) - tH * 2 + 45);
 
 		SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 		SDL_RenderFillRect(gRenderer, &nameUnderline);
@@ -1053,6 +1238,8 @@ void JamesSnake::getUserName()
 
 void JamesSnake::mainMenuLoop()
 {
+	
+
 	while (!quit)
 	{
 
@@ -1074,8 +1261,26 @@ void JamesSnake::mainMenuLoop()
 		}
 		if (gameOver)
 		{
+
 			TTF_SizeText(gFont, "game over", &tW, &tH);
 			gGameOverTextTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (GAME_FIELD_HEIGHT / 2));
+
+			if (writeScore)
+			{
+
+
+				std::ofstream myfile;
+				myfile.open("example.txt", std::ios_base::app);
+				if (myfile.is_open())
+				{
+					myfile << userName + " " + std::to_string(score) + "\n";
+					myfile.close();
+				}
+
+				writeScore = false;
+			}
+
+
 		}
 
 		showButtonMenu(buttonSelection);
@@ -1085,9 +1290,111 @@ void JamesSnake::mainMenuLoop()
 	}
 }
 
+void JamesSnake::highScoresMenuLoop()
+{
+	SDL_Color textColor = { 255, 255, 255 };
+	if (!gButtonPlayTextTexture.loadFromRenderedText("back", textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
+
+	}
+
+	SDL_Rect b1;
+	b1.w = SCREEN_WIDTH / 2;
+	b1.h = 70;
+	b1.x = SCREEN_WIDTH / 4;
+	b1.y = SCREEN_HEIGHT - SCREEN_HEIGHT / 3.3;
+
+	SDL_Rect hsBkg;
+	hsBkg.w = GAME_FIELD_WIDTH-2;
+	hsBkg.h = GAME_FIELD_HEIGHT-2;
+	hsBkg.x = GAME_FIELD_XPOS+1;
+	hsBkg.y = GAME_FIELD_YPOS+1;
+
+	SDL_Rect clearRect;
+	clearRect.w = SCREEN_WIDTH;
+	clearRect.h = 75;
+	clearRect.x = 0;
+	clearRect.y = 0;
+
+
+
+	while (!quit)
+	{
+		while (SDL_PollEvent(&e) != 0)
+		{
+
+			//User requests quit
+			if (e.type == SDL_QUIT)
+			{
+				quit = true;
+			}
+
+			handleEvent(e);
+		}
+
+		SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+		SDL_RenderFillRect(gRenderer, &b1);
+
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(gRenderer, &hsBkg);
+
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 255);
+		SDL_RenderFillRect(gRenderer, &clearRect);
+
+		gButtonSelectTexture.render(gRenderer, b1.x - 8, b1.y - 7);
+
+		TTF_SizeText(gFont, "back", &tW, &tH);
+		gButtonPlayTextTexture.render(gRenderer, b1.x + (b1.w / 2) - tW / 2, b1.y + (b1.h / 2) - tH / 2);
+
+
+		if (!gMapTextTexture.loadFromRenderedText(mapNames[mapNumber - 1], textColor, gRenderer, gFont))
+		{
+			printf("Failed to render text texture!\n");
+
+		}
+
+		SDL_Color textColor = { 255, 255, 255 };
+		TTF_SizeText(gFont, (char*)mapName.c_str(), &tW, &tH);
+		gMapTextTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), 25);
+
+		for (int i = 0; i < 10; i++)
+		{
+			if (!gHighScoresTextTexture.loadFromRenderedText(std::to_string(i+1), textColor, gRenderer, gFont))
+			{
+				printf("Failed to render text texture!\n");
+
+			}
+			gHighScoresTextTexture.render(gRenderer, 75, 100+(i*45));
+		}
+
+		for (int i = 0; i < 10; i++)
+		{
+			if (!gHighScoresTextTexture.loadFromRenderedText("BIGNIGGASUPREMEWTF  "  "25", textColor, gRenderer, gFont))
+			{
+				printf("Failed to render text texture!\n");
+
+			}
+			TTF_SizeText(gFont, "BIGNIGGASUPREMEWTF  "  "25", &tW, &tH);
+			gHighScoresTextTexture.render(gRenderer, GAME_FIELD_WIDTH - tW, 100 + (i * 45));
+		}
+
+
+
+		//Update screen
+		SDL_RenderPresent(gRenderer);
+
+		if (highScoresMenu == false)
+		{
+			break;
+		}
+	}
+}
+
 
 void JamesSnake::mainGameLoop()
 {
+	writeScore = true;
 	//menuStart = true;
 
 	srand(time(NULL));
@@ -1106,7 +1413,7 @@ void JamesSnake::mainGameLoop()
 
 	//The dot that will be moving around on the screen
 	SnakeSegment head;
-	head.mPosX = getBlockPos((GAME_FIELD_WIDTH / 2) - (GAME_FIELD_WIDTH / 6));
+	head.mPosX = getBlockPos((GAME_FIELD_WIDTH / 2) - (GAME_FIELD_WIDTH / 3) - SEGMENT_WIDTH);
 	head.mPosY = getBlockPos((GAME_FIELD_HEIGHT / 2));
 
 	
@@ -1124,7 +1431,7 @@ void JamesSnake::mainGameLoop()
 	food.w = SEGMENT_WIDTH;
 	food.h = SEGMENT_HEIGHT;
 
-	food.x = getBlockPos((GAME_FIELD_WIDTH / 2) + (GAME_FIELD_WIDTH / 6));
+	food.x = getBlockPos((GAME_FIELD_WIDTH / 2) + (GAME_FIELD_WIDTH / 3));
 	food.y = getBlockPos((GAME_FIELD_HEIGHT / 2));
 
 	bonusFood.w = SEGMENT_WIDTH;
@@ -1132,38 +1439,6 @@ void JamesSnake::mainGameLoop()
 	bonusFood.x = 0;
 	bonusFood.y = 0;
 
-	
-
-	////test
-	//gObstacleTexture.mHeight = gObstacleTexture.mHeight * scaleFactor;
-	//gHeadTexture.mHeight = gHeadTexture.mHeight * scaleFactor;
-	//gSegmentTexture.mHeight = gSegmentTexture.mHeight * scaleFactor;
-	//gKeyTexture.mHeight = gKeyTexture.mHeight * scaleFactor;
-
-	//gScoreTextTexture.mHeight = gScoreTextTexture.mHeight * scaleFactor;
-	//gMapTextTexture.mHeight = gMapTextTexture.mHeight * scaleFactor;
-	//gBestTextTexture.mHeight = gBestTextTexture.mHeight * scaleFactor;
-	//gBonusTextTexture.mHeight = gBonusTextTexture.mHeight * scaleFactor;
-
-	//gButtonPlayTextTexture.mHeight = gButtonPlayTextTexture.mHeight * scaleFactor;
-	//gButtonSettingsTextTexture.mHeight = gButtonSettingsTextTexture.mHeight * scaleFactor;
-	//gButtonHighScoresTextTexture.mHeight = gButtonHighScoresTextTexture.mHeight * scaleFactor;
-
-
-
-	//gObstacleTexture.mWidth = gObstacleTexture.mWidth * scaleFactor;
-	//gHeadTexture.mWidth = gHeadTexture.mWidth * scaleFactor;
-	//gSegmentTexture.mWidth = gSegmentTexture.mWidth * scaleFactor;
-	//gKeyTexture.mWidth = gKeyTexture.mWidth * scaleFactor;
-
-	//gScoreTextTexture.mWidth = gScoreTextTexture.mWidth * scaleFactor;
-	//gMapTextTexture.mWidth = gMapTextTexture.mWidth * scaleFactor;
-	//gBestTextTexture.mWidth = gBestTextTexture.mWidth * scaleFactor;
-	//gBonusTextTexture.mWidth = gBonusTextTexture.mWidth * scaleFactor;
-
-	//gButtonPlayTextTexture.mWidth = gButtonPlayTextTexture.mWidth * scaleFactor;
-	//gButtonSettingsTextTexture.mWidth = gButtonSettingsTextTexture.mWidth * scaleFactor;
-	//gButtonHighScoresTextTexture.mWidth = gButtonHighScoresTextTexture.mWidth * scaleFactor;
 
 
 	SDL_Color textColor = { 255, 255, 255 };
@@ -1173,7 +1448,13 @@ void JamesSnake::mainGameLoop()
 
 	}
 
+	if (!gMapTextTexture.loadFromRenderedText(mapNames[mapNumber-1], textColor, gRenderer, gFont))
+	{
+		printf("Failed to render text texture!\n");
 
+	}
+
+	
 	gameOver = false;
 
 
@@ -1263,14 +1544,13 @@ void JamesSnake::mainGameLoop()
 		}
 
 		
-
-		checkObstacleCollision();
-		checkBoundaryCollision();
-
-
 		//Clear screen
 		SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 		SDL_RenderClear(gRenderer);
+
+
+
+		
 
 		//Render food
 	
@@ -1306,8 +1586,6 @@ void JamesSnake::mainGameLoop()
 		SDL_RenderDrawRect(gRenderer, &field);
 
 
-		
-
 		renderObstacles();
 
 		//Update Snake Chain
@@ -1317,20 +1595,25 @@ void JamesSnake::mainGameLoop()
 		renderSnake();
 
 		//print score, map name, best score
-		gScoreTextTexture.render(gRenderer, 40, 25);
+		
 		TTF_SizeText(gFont, (char*)mapName.c_str(), &tW, &tH);
 		gMapTextTexture.render(gRenderer, (SCREEN_WIDTH/2) - (tW/2), 25);
 		gBestTextTexture.render(gRenderer, SCREEN_WIDTH - 175, 25);
+		gScoreTextTexture.render(gRenderer, 40, 25);
 
-		gKeyTexture.render(gRenderer, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 250);
+
+		
 
 
-		//Update screen
-		SDL_RenderPresent(gRenderer);
-
+	
 		if (menuStart)
 		{
 			mainMenuLoop();
+		}
+
+		if (highScoresMenu)
+		{
+			highScoresMenuLoop();
 		}
 
 		if (gettingName)
@@ -1338,10 +1621,17 @@ void JamesSnake::mainGameLoop()
 			getUserName();
 		}
 
+
+		checkObstacleCollision();
+		checkBoundaryCollision();
+
+		gKeyTexture.render(gRenderer, SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 250);
+		//Update screen
+		SDL_RenderPresent(gRenderer);
+
+
 		if (settingsMenu)
 		{
-
-
 			while (true)
 			{
 				while (SDL_PollEvent(&e) != 0)
@@ -1360,6 +1650,11 @@ void JamesSnake::mainGameLoop()
 				{
 					break;
 				}
+
+
+
+
+
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
 				SDL_RenderClear(gRenderer);
@@ -1369,6 +1664,8 @@ void JamesSnake::mainGameLoop()
 
 			}
 		}
+
+		
 
 	}
 
