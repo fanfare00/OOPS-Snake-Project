@@ -503,7 +503,7 @@ void JamesSnake::handleEvent(SDL_Event& e)
 
 			if (highScoresMenu)
 			{
-				
+				mapNumber = 1;
 				highScoresMenu = false;
 				menuStart = true;
 				mainGameLoop();
@@ -1370,12 +1370,12 @@ void JamesSnake::highScoresMenuLoop()
 
 		for (int i = 0; i < 10; i++)
 		{
-			if (!gHighScoresTextTexture.loadFromRenderedText("BIGNIGGASUPREMEWTF  "  "25", textColor, gRenderer, gFont))
+			if (!gHighScoresTextTexture.loadFromRenderedText("biglongtestname  "  "25", textColor, gRenderer, gFont))
 			{
 				printf("Failed to render text texture!\n");
 
 			}
-			TTF_SizeText(gFont, "BIGNIGGASUPREMEWTF  "  "25", &tW, &tH);
+			TTF_SizeText(gFont, "biglongtestname  "  "25", &tW, &tH);
 			gHighScoresTextTexture.render(gRenderer, GAME_FIELD_WIDTH - tW, 100 + (i * 45));
 		}
 
@@ -1394,6 +1394,7 @@ void JamesSnake::highScoresMenuLoop()
 
 void JamesSnake::mainGameLoop()
 {
+	
 	writeScore = true;
 	//menuStart = true;
 
@@ -1614,6 +1615,7 @@ void JamesSnake::mainGameLoop()
 		if (highScoresMenu)
 		{
 			highScoresMenuLoop();
+
 		}
 
 		if (gettingName)
@@ -1624,15 +1626,19 @@ void JamesSnake::mainGameLoop()
 
 		checkObstacleCollision();
 		checkBoundaryCollision();
-
 		gKeyTexture.render(gRenderer, SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT - 250);
-		//Update screen
-		SDL_RenderPresent(gRenderer);
+		
+		
+		if (!quit)
+		{
+			//Update screen
+			SDL_RenderPresent(gRenderer);
+		}
 
 
 		if (settingsMenu)
 		{
-			while (true)
+			while (!quit)
 			{
 				while (SDL_PollEvent(&e) != 0)
 				{
