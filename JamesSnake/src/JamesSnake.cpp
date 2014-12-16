@@ -243,6 +243,7 @@ void JamesSnake::start()
 void JamesSnake::setGameText()
 {
 
+
 	//Render text
 	SDL_Color textColor = {255, 255, 255 };
 	if (!gScoreTextTexture.loadFromRenderedText("Score " + std::to_string(score), textColor, gRenderer, gFont))
@@ -1261,7 +1262,7 @@ void JamesSnake::mainMenuLoop()
 		}
 		if (gameOver)
 		{
-
+			gamesPlayed += 1;
 			TTF_SizeText(gFont, "game over", &tW, &tH);
 			gGameOverTextTexture.render(gRenderer, (SCREEN_WIDTH / 2) - (tW / 2), (GAME_FIELD_HEIGHT / 2));
 
@@ -1394,6 +1395,7 @@ void JamesSnake::highScoresMenuLoop()
 
 void JamesSnake::mainGameLoop()
 {
+	
 	
 	writeScore = true;
 	//menuStart = true;
@@ -1600,10 +1602,20 @@ void JamesSnake::mainGameLoop()
 		TTF_SizeText(gFont, (char*)mapName.c_str(), &tW, &tH);
 		gMapTextTexture.render(gRenderer, (SCREEN_WIDTH/2) - (tW/2), 25);
 		gBestTextTexture.render(gRenderer, SCREEN_WIDTH - 175, 25);
+		gScoreTextTexture.loadFromRenderedText("Score " + std::to_string(score), textColor, gRenderer, gFont);
 		gScoreTextTexture.render(gRenderer, 40, 25);
 
+		if (userName != "")
+		{
 
 		
+			SDL_Color textColor = { 255, 255, 255 };
+			gScoreTextTexture.loadFromRenderedText(userName, textColor, gRenderer, gFont);
+			gScoreTextTexture.render(gRenderer, 10, SCREEN_HEIGHT - 80);
+
+			gScoreTextTexture.loadFromRenderedText("Played " + std::to_string(gamesPlayed +1), textColor, gRenderer, gFont);
+			gScoreTextTexture.render(gRenderer, 10, SCREEN_HEIGHT - 40);
+		}
 
 
 	
@@ -1659,7 +1671,7 @@ void JamesSnake::mainGameLoop()
 
 
 
-
+				
 
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0x00, 0x00, 0x00, 0xFF);
