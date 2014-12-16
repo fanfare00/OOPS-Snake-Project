@@ -31,7 +31,8 @@ public:
 	TTF_Font *gFont;
 
 	int tW, tH;
-	
+	int gamesPlayed;
+
 	std::vector<std::string>mapNames;
 	std::string nameBuffer;
 	std::string userName;
